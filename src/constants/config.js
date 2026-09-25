@@ -27,6 +27,9 @@ export const OSRM_URL = 'https://router.project-osrm.org/route/v1/driving';
 /** Photon autocomplete endpoint (OpenStreetMap data, built for type-ahead search). */
 export const PHOTON_URL = 'https://photon.komoot.io/api/';
 
+/** Photon reverse-geocoding endpoint (coordinates → place name), used for "current location". */
+export const PHOTON_REVERSE_URL = 'https://photon.komoot.io/reverse';
+
 /** Suggestion area as "minLon,minLat,maxLon,maxLat" (Sri Lanka). Set to null to search worldwide. */
 export const SEARCH_BBOX = '79.5,5.8,82.0,9.9';
 

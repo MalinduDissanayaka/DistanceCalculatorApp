@@ -38,6 +38,12 @@
         {
           "hidden": true
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to set the ride start point."
+        }
       ]
     ],
     "experiments": {

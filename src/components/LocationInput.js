@@ -16,6 +16,8 @@ import useLocationSuggestions from '../hooks/useLocationSuggestions';
  * @param {() => void} props.onSubmit Called from the button or keyboard "search" key.
  * @param {(suggestion: import('../hooks/useLocationSuggestions').Suggestion) => void} props.onSelectSuggestion
  *   Called when the user taps a suggestion.
+ * @param {() => void} [props.onUseCurrentLocation] If given, shows a "Use my current location" button.
+ * @param {boolean} [props.locating] Shows a spinner on the current-location button.
  * @param {boolean} props.loading Shows a spinner and disables the button.
  * @param {{ name: string } | null} props.resolved Found location; its name is shown below the field.
  * @param {string} [props.placeholder]
@@ -27,6 +29,8 @@ export default function LocationInput({
   onChangeText,
   onSubmit,
   onSelectSuggestion,
+  onUseCurrentLocation,
+  locating = false,
   loading,
   resolved,
   placeholder,
@@ -72,6 +76,28 @@ export default function LocationInput({
           )}
         </TouchableOpacity>
       </View>
+
+      {onUseCurrentLocation ? (
+        <TouchableOpacity
+          style={styles.currentLocation}
+          onPress={() => {
+            Keyboard.dismiss();
+            onUseCurrentLocation();
+          }}
+          disabled={locating}
+          hitSlop={6}
+          activeOpacity={0.6}
+        >
+          {locating ? (
+            <ActivityIndicator size="small" color={COLORS.primary} />
+          ) : (
+            <Text style={styles.currentLocationIcon}>◎</Text>
+          )}
+          <Text style={styles.currentLocationText}>
+            {locating ? 'Finding your location…' : 'Use my current location'}
+          </Text>
+        </TouchableOpacity>
+      ) : null}
 
       {showList ? (
         <View style={styles.suggestionBox}>
@@ -144,6 +170,10 @@ const styles = StyleSheet.create({
   buttonDisabled: { backgroundColor: COLORS.disabled },
   setButtonText: { color: '#fff', fontWeight: '700' },
   resolvedText: { fontSize: 12, color: COLORS.start, marginTop: 6 },
+
+  currentLocation: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', marginTop: 8 },
+  currentLocationIcon: { fontSize: 16, color: COLORS.primary, width: 20, textAlign: 'center' },
+  currentLocationText: { fontSize: 13, fontWeight: '600', color: COLORS.primary, marginLeft: 6 },
 
   suggestionBox: {
     marginTop: 6,

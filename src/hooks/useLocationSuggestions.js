@@ -7,7 +7,7 @@ import {
   SUGGESTION_LIMIT,
   SUGGESTION_MIN_CHARS,
 } from '../constants/config';
-import { fetchJson } from '../utils/helpers';
+import { describePlace, fetchJson } from '../utils/helpers';
 
 /**
  * @typedef {object} Suggestion
@@ -43,21 +43,12 @@ async function fetchSuggestions(query, signal) {
   for (const feature of data?.features ?? []) {
     const p = feature.properties ?? {};
     const [lon, lat] = feature.geometry?.coordinates ?? [];
-    const street = [p.housenumber, p.street].filter(Boolean).join(' ');
-    const title = p.name || street;
-    if (!title || lat == null || lon == null) continue;
+    const place = describePlace(p);
+    if (!place || lat == null || lon == null) continue;
 
-    // Build the context line without repeating the title (e.g. "Kandy, Kandy, ...").
-    const context = [];
-    for (const part of [p.name && street, p.city, p.county, p.state, p.country]) {
-      if (part && part !== title && !context.includes(part)) context.push(part);
-    }
-    const subtitle = context.join(', ');
-    const name = subtitle ? `${title}, ${subtitle}` : title;
-
-    if (seen.has(name)) continue;
-    seen.add(name);
-    suggestions.push({ id: `${p.osm_type}${p.osm_id}-${suggestions.length}`, lat, lon, title, subtitle, name });
+    if (seen.has(place.name)) continue;
+    seen.add(place.name);
+    suggestions.push({ id: `${p.osm_type}${p.osm_id}-${suggestions.length}`, lat, lon, ...place });
     if (suggestions.length === SUGGESTION_LIMIT) break;
   }
   return suggestions;

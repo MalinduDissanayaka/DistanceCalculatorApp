@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   ScrollView,
   StyleSheet,
@@ -17,6 +18,7 @@ import LocationInput from './src/components/LocationInput';
 import MapView from './src/components/MapView';
 import TripSummary from './src/components/TripSummary';
 import { COLORS, COUNTRY_CODE, NOMINATIM_URL, OSRM_URL, RATE_PER_KM, SHADOW } from './src/constants/config';
+import { getCurrentLocation } from './src/utils/currentLocation';
 import { describeError, fetchJson, formatNumber, shortName } from './src/utils/helpers';
 
 /**
@@ -32,6 +34,7 @@ function FareCalculatorScreen() {
 
   const [searching, setSearching] = useState({ start: false, drop: false });
   const [calculating, setCalculating] = useState(false);
+  const [locating, setLocating] = useState(false);
   const [scrollEnabled, setScrollEnabled] = useState(true);
 
   /** Geocodes the Start or Drop query with Nominatim and stores the result. */
@@ -150,6 +153,34 @@ function FareCalculatorScreen() {
     setRoute(null); // Previous route no longer matches.
   };
 
+  /** Sets the Start location to the device's current GPS position. */
+  const setStartToCurrentLocation = async () => {
+    setLocating(true);
+    try {
+      const location = await getCurrentLocation();
+      setStartQuery('Current location');
+      setStartCoords(location);
+      setRoute(null); // Previous route no longer matches.
+    } catch (error) {
+      if (error.code === 'permission') {
+        Alert.alert(
+          'Location permission needed',
+          'Allow location access to use your current location as the start point.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => Linking.openSettings() },
+          ],
+        );
+      } else if (error.code === 'services') {
+        Alert.alert('Location is off', 'Turn on location (GPS) on your phone and try again.');
+      } else {
+        Alert.alert('Location unavailable', "We couldn't get your current location. Try again, or type the start location.");
+      }
+    } finally {
+      setLocating(false);
+    }
+  };
+
   const resetAll = () => {
     setStartQuery('');
     setDropQuery('');
@@ -204,6 +235,8 @@ function FareCalculatorScreen() {
               onChangeText={handleStartChange}
               onSubmit={() => searchLocation('start')}
               onSelectSuggestion={(item) => selectSuggestion('start', item)}
+              onUseCurrentLocation={setStartToCurrentLocation}
+              locating={locating}
               loading={searching.start}
               resolved={startCoords}
             />

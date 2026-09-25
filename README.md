@@ -14,6 +14,7 @@ It uses only free, open services, so **no Google Maps or API keys are needed**:
 ## Features
 
 - Start typing a **Start** or **Drop** location and tap one of the suggestions, or type the full name and tap **Set**.
+- Tap **Use my current location** to set the Start location from your phone's GPS.
 - Tap **Calculate Fare & Route** to get the driving route.
 - The map shows a green start pin, a red drop pin and the route as a blue line.
 - The trip summary shows:
@@ -101,6 +102,7 @@ DistanceCalculatorApp/
 │   │   └── TripSummary.js        # Fare card + Confirm Ride button
 │   ├── constants/config.js       # Settings, colours, API URLs, map HTML
 │   ├── hooks/useLocationSuggestions.js  # Suggestions while typing (Photon)
+│   ├── utils/currentLocation.js  # GPS position + address for "Use my current location"
 │   └── utils/helpers.js          # fetchJson, error messages, number/time formatting
 ├── app.json                      # Expo app settings
 └── package.json                  # Dependencies and scripts

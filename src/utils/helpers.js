@@ -74,3 +74,22 @@ export function shortName(name) {
   if (!name) return '';
   return name.split(',').slice(0, 2).join(',').trim();
 }
+
+/**
+ * Builds display labels from Photon place properties.
+ * The subtitle never repeats the title (avoids "Kandy, Kandy, ...").
+ * @param {object} p Photon feature `properties`.
+ * @returns {{ title: string, subtitle: string, name: string } | null} Null if the place has no usable name.
+ */
+export function describePlace(p) {
+  const street = [p.housenumber, p.street].filter(Boolean).join(' ');
+  const title = p.name || street;
+  if (!title) return null;
+
+  const context = [];
+  for (const part of [p.name && street, p.city, p.county, p.state, p.country]) {
+    if (part && part !== title && !context.includes(part)) context.push(part);
+  }
+  const subtitle = context.join(', ');
+  return { title, subtitle, name: subtitle ? `${title}, ${subtitle}` : title };
+}
