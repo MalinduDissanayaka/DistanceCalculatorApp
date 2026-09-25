@@ -3,15 +3,18 @@ import { REQUEST_TIMEOUT_MS } from '../constants/config';
 /**
  * Fetches a URL and parses the JSON body, aborting after REQUEST_TIMEOUT_MS.
  * @param {string} url
- * @param {RequestInit} [options] Extra fetch options (headers, etc.).
+ * @param {RequestInit} [options] Extra fetch options (headers, etc.). An optional
+ *   `signal` lets the caller cancel the request early.
  * @returns {Promise<any>} Parsed JSON.
- * @throws {Error} `HTTP <status>` for non-2xx responses, or an AbortError on timeout.
+ * @throws {Error} `HTTP <status>` for non-2xx responses, or an AbortError on timeout/cancel.
  */
 export async function fetchJson(url, options = {}) {
+  const { signal, ...rest } = options;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  signal?.addEventListener('abort', () => controller.abort());
   try {
-    const response = await fetch(url, { ...options, signal: controller.signal });
+    const response = await fetch(url, { ...rest, signal: controller.signal });
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }

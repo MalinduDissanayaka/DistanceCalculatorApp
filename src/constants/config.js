@@ -22,6 +22,23 @@ export const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
 /** OSRM driving-route endpoint. */
 export const OSRM_URL = 'https://router.project-osrm.org/route/v1/driving';
 
+// ─── Search-as-you-type suggestions ──────────────────────────────────────────
+
+/** Photon autocomplete endpoint (OpenStreetMap data, built for type-ahead search). */
+export const PHOTON_URL = 'https://photon.komoot.io/api/';
+
+/** Suggestion area as "minLon,minLat,maxLon,maxLat" (Sri Lanka). Set to null to search worldwide. */
+export const SEARCH_BBOX = '79.5,5.8,82.0,9.9';
+
+/** Minimum characters typed before suggestions are requested. */
+export const SUGGESTION_MIN_CHARS = 3;
+
+/** Wait this long after the last keystroke before requesting suggestions. */
+export const SUGGESTION_DEBOUNCE_MS = 400;
+
+/** Maximum number of suggestions shown. */
+export const SUGGESTION_LIMIT = 5;
+
 // ─── Theme ───────────────────────────────────────────────────────────────────
 
 /** App colour palette. */

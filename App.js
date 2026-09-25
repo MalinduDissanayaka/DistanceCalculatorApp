@@ -137,6 +137,19 @@ function FareCalculatorScreen() {
     }
   };
 
+  /** Uses a tapped suggestion as the Start or Drop location (no extra search needed). */
+  const selectSuggestion = (type, suggestion) => {
+    const location = { lat: suggestion.lat, lon: suggestion.lon, name: suggestion.name };
+    if (type === 'start') {
+      setStartQuery(suggestion.title);
+      setStartCoords(location);
+    } else {
+      setDropQuery(suggestion.title);
+      setDropCoords(location);
+    }
+    setRoute(null); // Previous route no longer matches.
+  };
+
   const resetAll = () => {
     setStartQuery('');
     setDropQuery('');
@@ -190,6 +203,7 @@ function FareCalculatorScreen() {
               value={startQuery}
               onChangeText={handleStartChange}
               onSubmit={() => searchLocation('start')}
+              onSelectSuggestion={(item) => selectSuggestion('start', item)}
               loading={searching.start}
               resolved={startCoords}
             />
@@ -200,6 +214,7 @@ function FareCalculatorScreen() {
               value={dropQuery}
               onChangeText={handleDropChange}
               onSubmit={() => searchLocation('drop')}
+              onSelectSuggestion={(item) => selectSuggestion('drop', item)}
               loading={searching.drop}
               resolved={dropCoords}
             />
@@ -248,7 +263,7 @@ export default function App() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   safeArea: { flex: 1, backgroundColor: COLORS.bg },
-  content: { padding: 16, paddingBottom: 120 },
+  content: { padding: 16, paddingBottom: 23 },
 
   header: { marginBottom: 16, marginTop: 8 },
   title: { fontSize: 26, fontWeight: '800', color: COLORS.text },

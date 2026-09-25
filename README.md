@@ -7,12 +7,13 @@ It uses only free, open services, so **no Google Maps or API keys are needed**:
 | Feature | Service |
 | --- | --- |
 | Map | [OpenStreetMap](https://www.openstreetmap.org) tiles shown with [Leaflet](https://leafletjs.com) inside a WebView |
-| Place search (name → coordinates) | [Nominatim](https://nominatim.org) |
+| Suggestions while typing | [Photon](https://photon.komoot.io) |
+| Place search with the Set button | [Nominatim](https://nominatim.org) |
 | Driving route and distance | [OSRM](https://project-osrm.org) |
 
 ## Features
 
-- Enter a **Start** and a **Drop** location and tap **Set** to find each one.
+- Start typing a **Start** or **Drop** location and tap one of the suggestions, or type the full name and tap **Set**.
 - Tap **Calculate Fare & Route** to get the driving route.
 - The map shows a green start pin, a red drop pin and the route as a blue line.
 - The trip summary shows:
@@ -99,6 +100,7 @@ DistanceCalculatorApp/
 │   │   ├── StatRow.js            # One "label ... value" row
 │   │   └── TripSummary.js        # Fare card + Confirm Ride button
 │   ├── constants/config.js       # Settings, colours, API URLs, map HTML
+│   ├── hooks/useLocationSuggestions.js  # Suggestions while typing (Photon)
 │   └── utils/helpers.js          # fetchJson, error messages, number/time formatting
 ├── app.json                      # Expo app settings
 └── package.json                  # Dependencies and scripts
@@ -118,10 +120,14 @@ These settings are in [`src/constants/config.js`](src/constants/config.js):
 | `DEFAULT_CENTER` | Colombo (`6.9271, 79.8612`) | Where the map starts |
 | `COUNTRY_CODE` | `'lk'` | Limits place search to Sri Lanka. Set it to `''` to search worldwide |
 | `REQUEST_TIMEOUT_MS` | `15000` | How long to wait for a network request before showing an error |
+| `SEARCH_BBOX` | Sri Lanka | Area suggestions come from. Set it to `null` to suggest places worldwide |
+| `SUGGESTION_MIN_CHARS` | `3` | Letters to type before suggestions appear |
+| `SUGGESTION_DEBOUNCE_MS` | `400` | Pause after typing before suggestions are fetched |
+| `SUGGESTION_LIMIT` | `5` | Maximum suggestions shown |
 
 ## Usage limits
 
-The public Nominatim and OSRM servers are free and meant for light use. Nominatim allows about **1 request per second**. That's fine for development and testing. Before releasing the app to many users, host your own Nominatim and OSRM servers or switch to a paid provider.
+The public Photon, Nominatim and OSRM servers are free and meant for light use. Nominatim allows about **1 request per second**. That's fine for development and testing. Before releasing the app to many users, host your own Nominatim and OSRM servers or switch to a paid provider.
 
 ## Tech stack
 
@@ -129,7 +135,7 @@ The public Nominatim and OSRM servers are free and meant for light use. Nominati
 - [Expo Router](https://docs.expo.dev/router/introduction/)
 - [react-native-webview](https://github.com/react-native-webview/react-native-webview)
 - [Leaflet](https://leafletjs.com) and OpenStreetMap
-- Nominatim and OSRM
+- Photon, Nominatim and OSRM
 
 ## Credits
 

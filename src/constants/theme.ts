@@ -61,5 +61,6 @@ export const Spacing = {
   six: 64,
 } as const;
 
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
+// The JS tab bar sits below the screen content instead of over it, so no extra inset is needed.
+export const BottomTabInset = 0;
 export const MaxContentWidth = 800;
