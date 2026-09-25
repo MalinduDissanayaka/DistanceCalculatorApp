@@ -88,20 +88,29 @@ The result is rounded to the nearest rupee.
 
 ```
 DistanceCalculatorApp/
-├── App.js               # The fare calculator screen (map, search, routing, fare)
-├── src/app/index.tsx    # Home tab; shows the screen from App.js
-├── src/app/_layout.tsx  # Tab navigation (Expo Router)
-├── app.json             # Expo app settings
-└── package.json         # Dependencies and scripts
+├── App.js                        # Main screen: state, search/route logic, layout
+├── src/
+│   ├── app/
+│   │   ├── index.tsx             # Home tab; shows the screen from App.js
+│   │   └── _layout.tsx           # Tab navigation (Expo Router)
+│   ├── components/
+│   │   ├── LocationInput.js      # Location text box + Set button
+│   │   ├── MapView.js            # Leaflet map in a WebView (markers, route line)
+│   │   ├── StatRow.js            # One "label ... value" row
+│   │   └── TripSummary.js        # Fare card + Confirm Ride button
+│   ├── constants/config.js       # Settings, colours, API URLs, map HTML
+│   └── utils/helpers.js          # fetchJson, error messages, number/time formatting
+├── app.json                      # Expo app settings
+└── package.json                  # Dependencies and scripts
 ```
 
-The app uses [Expo Router](https://docs.expo.dev/router/introduction/), so screens live in `src/app/`. All of the calculator code is in `App.js`, and the Home tab shows it.
+The app uses [Expo Router](https://docs.expo.dev/router/introduction/), so screens live in `src/app/`. The calculator screen is in `App.js`, and the Home tab shows it.
 
 > ⚠️ Don't run `npm run reset-project`. It replaces `src/app/` with a blank app, and the Home tab would stop showing the calculator.
 
 ## Configuration
 
-These settings are at the top of [`App.js`](App.js):
+These settings are in [`src/constants/config.js`](src/constants/config.js):
 
 | Setting | Default | What it does |
 | --- | --- | --- |
