@@ -12,12 +12,15 @@ import {
   View,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { router } from 'expo-router';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import LocationInput from './src/components/LocationInput';
 import MapView from './src/components/MapView';
 import TripSummary from './src/components/TripSummary';
 import { COLORS, COUNTRY_CODE, NOMINATIM_URL, OSRM_URL, RATE_PER_KM, SHADOW } from './src/constants/config';
+import { useAuth } from './src/context/AuthContext';
+import { saveTrip } from './src/utils/api';
 import { getCurrentLocation } from './src/utils/currentLocation';
 import { describeError, fetchJson, formatNumber, shortName } from './src/utils/helpers';
 
@@ -26,6 +29,7 @@ import { describeError, fetchJson, formatNumber, shortName } from './src/utils/h
  * and fare, and show everything on the map.
  */
 function FareCalculatorScreen() {
+  const { user, signOut, withToken } = useAuth();
   const [startQuery, setStartQuery] = useState('');
   const [dropQuery, setDropQuery] = useState('');
   const [startCoords, setStartCoords] = useState(null); // { lat, lon, name }
@@ -36,6 +40,7 @@ function FareCalculatorScreen() {
   const [calculating, setCalculating] = useState(false);
   const [locating, setLocating] = useState(false);
   const [scrollEnabled, setScrollEnabled] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   /** Geocodes the Start or Drop query with Nominatim and stores the result. */
   const searchLocation = useCallback(async (type) => {
@@ -189,12 +194,45 @@ function FareCalculatorScreen() {
     setRoute(null);
   };
 
-  const confirmRide = () => {
-    Alert.alert(
-      'Ride Confirmed 🎉',
-      `From: ${shortName(startCoords?.name)}\nTo: ${shortName(dropCoords?.name)}\n\n` +
-        `Distance: ${formatNumber(route.distanceKm, 2)} km\nTotal Fare: LKR ${formatNumber(route.fare)}`,
-    );
+  /** Saves the calculated trip to the user's history on the backend. */
+  const confirmRide = async () => {
+    setSaving(true);
+    try {
+      await withToken((token) => saveTrip(token, {
+        // The backend allows up to 500 characters per location name.
+        startLocation: (startCoords.name || startQuery).slice(0, 500),
+        dropLocation: (dropCoords.name || dropQuery).slice(0, 500),
+        startLat: startCoords.lat,
+        startLng: startCoords.lon,
+        dropLat: dropCoords.lat,
+        dropLng: dropCoords.lon,
+        distanceKm: Math.round(route.distanceKm * 100) / 100,
+        durationSec: Math.round(route.durationSec),
+        fare: route.fare,
+      }));
+      Alert.alert(
+        'Ride Confirmed 🎉',
+        `From: ${shortName(startCoords.name)}\nTo: ${shortName(dropCoords.name)}\n\n` +
+          `Distance: ${formatNumber(route.distanceKm, 2)} km\nTotal Fare: LKR ${formatNumber(route.fare)}\n\n` +
+          'Saved to your trip history.',
+        [
+          { text: 'View history', onPress: () => router.navigate('/history') },
+          { text: 'OK' },
+        ],
+      );
+    } catch (error) {
+      // A 401 has already logged the user out and explained why.
+      if (error.status !== 401) Alert.alert('Could not save ride', error.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const confirmSignOut = () => {
+    Alert.alert('Log out?', 'You will need to log in again to save trips.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Log out', style: 'destructive', onPress: signOut },
+    ]);
   };
 
   const canCalculate = !!startCoords && !!dropCoords && !calculating;
@@ -212,8 +250,14 @@ function FareCalculatorScreen() {
         >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>Ride Fare Calculator</Text>
-            <Text style={styles.subtitle}>Get the driving distance and fare for your trip</Text>
+            <View style={styles.flex}>
+              <Text style={styles.greeting} numberOfLines={1}>Hi, {user?.name?.split(' ')[0] || 'there'} 👋</Text>
+              <Text style={styles.title}>Ride Fare Calculator</Text>
+              <Text style={styles.subtitle}>Get the driving distance and fare for your trip</Text>
+            </View>
+            <TouchableOpacity style={styles.logoutButton} onPress={confirmSignOut} hitSlop={8} accessibilityRole="button">
+              <Text style={styles.logoutText}>Log out</Text>
+            </TouchableOpacity>
           </View>
 
           {/* Inputs */}
@@ -267,7 +311,7 @@ function FareCalculatorScreen() {
           </View>
 
           {/* Summary */}
-          {route ? <TripSummary route={route} onConfirm={confirmRide} /> : null}
+          {route ? <TripSummary route={route} onConfirm={confirmRide} saving={saving} /> : null}
 
           {/* Map */}
           <MapView
@@ -298,7 +342,17 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: COLORS.bg },
   content: { padding: 16, paddingBottom: 23 },
 
-  header: { marginBottom: 16, marginTop: 8 },
+  header: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 16, marginTop: 8 },
+  greeting: { fontSize: 14, fontWeight: '600', color: COLORS.primary, marginBottom: 2 },
+  logoutButton: {
+    backgroundColor: COLORS.card,
+    borderRadius: 10,
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    marginLeft: 12,
+    ...SHADOW,
+  },
+  logoutText: { color: COLORS.danger, fontWeight: '700', fontSize: 13 },
   title: { fontSize: 26, fontWeight: '800', color: COLORS.text },
   subtitle: { fontSize: 14, color: COLORS.muted, marginTop: 4 },
 

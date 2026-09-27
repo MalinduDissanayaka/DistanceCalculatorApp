@@ -1,4 +1,28 @@
+import Constants from 'expo-constants';
 import { Platform } from 'react-native';
+
+// ─── Backend API ─────────────────────────────────────────────────────────────
+
+/** Port the Spring Boot backend listens on. */
+const API_PORT = 8080;
+
+/**
+ * Base URL of the Spring Boot backend, without a trailing slash.
+ *
+ * "localhost" only works in a browser on the same computer — on a phone or
+ * emulator it means the device itself. So by default we reuse the computer's
+ * address that Expo's dev server is already using (e.g. 192.168.1.5), which is
+ * where the backend runs during development.
+ *
+ * Set EXPO_PUBLIC_API_URL in a `.env` file to override it,
+ * e.g. EXPO_PUBLIC_API_URL=https://api.example.com
+ */
+export const API_URL = (() => {
+  const fromEnv = process.env.EXPO_PUBLIC_API_URL;
+  if (fromEnv) return fromEnv.replace(/\/+$/, '');
+  const devHost = Constants.expoConfig?.hostUri?.split(':')[0];
+  return `http://${devHost || 'localhost'}:${API_PORT}`;
+})();
 
 // ─── App settings ────────────────────────────────────────────────────────────
 
@@ -57,6 +81,8 @@ export const COLORS = {
   drop: '#DC2626',
   accent: '#F59E0B',
   disabled: '#9CA3AF',
+  danger: '#DC2626',
+  dangerSoft: '#FEF2F2',
 };
 
 /** Platform-specific drop shadow shared by cards. */

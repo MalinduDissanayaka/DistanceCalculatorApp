@@ -93,3 +93,19 @@ export function describePlace(p) {
   const subtitle = context.join(', ');
   return { title, subtitle, name: subtitle ? `${title}, ${subtitle}` : title };
 }
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/**
+ * Formats an ISO timestamp in the device's time zone, e.g. "28 Sep 2026, 2:05 PM".
+ * @param {string} iso
+ * @returns {string}
+ */
+export function formatDateTime(iso) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '';
+  const hours = date.getHours() % 12 || 12;
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const period = date.getHours() < 12 ? 'AM' : 'PM';
+  return `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}, ${hours}:${minutes} ${period}`;
+}

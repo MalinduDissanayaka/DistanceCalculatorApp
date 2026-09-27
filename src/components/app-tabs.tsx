@@ -1,4 +1,5 @@
 import { Tabs } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
 import { Image, useColorScheme } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -39,13 +40,14 @@ export default function AppTabs() {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="history"
         options={{
-          title: 'Explore',
+          title: 'History',
           tabBarIcon: ({ color }) => (
-            <Image
-              source={require('@/assets/images/tabIcons/explore.png')}
-              style={{ width: 22, height: 22, tintColor: color }}
+            <SymbolView
+              name={{ ios: 'clock.arrow.circlepath', android: 'history', web: 'history' }}
+              tintColor={color}
+              size={22}
             />
           ),
         }}

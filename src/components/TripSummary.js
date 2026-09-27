@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { COLORS, RATE_PER_KM, SHADOW } from '../constants/config';
 import { formatDuration, formatNumber } from '../utils/helpers';
@@ -7,13 +7,14 @@ import StatRow from './StatRow';
 
 /**
  * Card showing the calculated fare, distance, drive time and rate,
- * with a "Confirm Ride" button.
+ * with a "Confirm Ride" button that saves the trip.
  *
  * @param {object} props
  * @param {{ distanceKm: number, durationSec: number, fare: number }} props.route Calculated route.
  * @param {() => void} props.onConfirm Called when "Confirm Ride" is tapped.
+ * @param {boolean} [props.saving] Shows a spinner and disables the button while the trip is saved.
  */
-export default function TripSummary({ route, onConfirm }) {
+export default function TripSummary({ route, onConfirm, saving = false }) {
   return (
     <View style={styles.card}>
       <Text style={styles.cardTitle}>Trip summary</Text>
@@ -27,8 +28,13 @@ export default function TripSummary({ route, onConfirm }) {
       <StatRow label="Est. drive time" value={formatDuration(route.durationSec)} />
       <StatRow label="Rate" value={`LKR ${RATE_PER_KM} / km`} />
 
-      <TouchableOpacity style={styles.confirmButton} onPress={onConfirm} activeOpacity={0.85}>
-        <Text style={styles.confirmButtonText}>Confirm Ride</Text>
+      <TouchableOpacity
+        style={[styles.confirmButton, saving && styles.buttonDisabled]}
+        onPress={onConfirm}
+        disabled={saving}
+        activeOpacity={0.85}
+      >
+        {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.confirmButtonText}>Confirm Ride</Text>}
       </TouchableOpacity>
     </View>
   );
@@ -62,4 +68,5 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   confirmButtonText: { color: '#fff', fontWeight: '800', fontSize: 16 },
+  buttonDisabled: { backgroundColor: COLORS.disabled },
 });
